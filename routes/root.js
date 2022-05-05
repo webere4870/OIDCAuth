@@ -2,6 +2,9 @@ const express = require('express')
 const passport = require('passport')
 const isLoggedIn = require('./../utils/authenticate')
 const Router = express.Router()
+const Users = require('mongoose').model("JWTUsers")
+const {verifyUser, createJWT, createUser} = require('./../utils/jwt')
+const dayjs = require('dayjs')
 
 Router.get("/", (req, res) => {
     res.render("index");
@@ -28,11 +31,39 @@ Router.get('/auth/facebook', passport.authenticate('facebook', {
     scope: ['openid', 'public_profile', 'email']
 }))
 
-
-Router.post('/session', (req, res)=>
+Router.get('/register', (req, res)=>
 {
-    req.session.username = req.body.username
-    res.redirect("/dashboard")
+    res.render('register')
+})
+
+Router.post('/register', async (req, res)=>
+{
+    let {username, password} = req.body;
+    let user = await createUser(username, password)
+    Users.create(user)
+    let jwt = createJWT(username)
+    res.cookie("secureCookie", JSON.stringify(jwt), {
+        httpOnly: true,
+        expires: dayjs().add(30, "days").toDate(),
+      });
+    res.redirect("/")
+})
+
+
+Router.post('/login', async (req, res)=>
+{
+    let{username, password} = req.body
+    let user = await Users.findOne({username: username})
+    console.log(user)
+    let isValid = await verifyUser(password, user.salt, user.hash)
+    if(isValid == true)
+    {
+        res.redirect("/protected")
+    }
+    else{
+        res.redirect("/")
+    }
+    
 })
   
 Router.get("/dashboard",(req, res) => {
@@ -41,7 +72,9 @@ Router.get("/dashboard",(req, res) => {
 
 Router.get('/protected', isLoggedIn,(req, res)=>
 {
-    res.render('protected', {img: req.session.passport.user.picture})
+    // Access image option
+    // {img: req.session.passport.user.picture}
+    res.render('protected')
 })
   
 Router.get("/logout", (req, res) => {

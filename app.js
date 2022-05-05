@@ -8,7 +8,8 @@ const passport = require('passport')
 const MongoStore = require('connect-mongo')
 require('./utils/google')
 require('./utils/facebook')
-
+require('./utils/passportJWT')
+require('./utils/database')
 
 
 app.use(express.urlencoded({extended: false}))
