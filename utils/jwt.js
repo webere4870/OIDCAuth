@@ -4,17 +4,16 @@ const jsonwebtoken = require('jsonwebtoken')
 function createJWT(username)
 {
     const payload = {
-        username: username,
-        expiration: Date.now() + parseInt('100')
+        sub: username,
+        expiration: Date.now() + parseInt('1000000')
     }
-    let jwt = jsonwebtoken.sign(payload, 'secret')
+    let jwt = jsonwebtoken.sign(payload, "secret", {expiresIn: "1d"})
     return jwt
 }
 
 async function verifyUser(passwordAttempt, salt,hash)
 {
     let newHash = (await bcrypt.hash(passwordAttempt, salt)).toString()
-    console.log(hash, newHash)
     if(newHash == hash)
     {
         return true;

@@ -58,6 +58,11 @@ Router.post('/login', async (req, res)=>
     let isValid = await verifyUser(password, user.salt, user.hash)
     if(isValid == true)
     {
+        let jwt = createJWT(username)
+        res.cookie("secureCookie", JSON.stringify(jwt), {
+            httpOnly: true,
+            expires: dayjs().add(30, "days").toDate(),
+          });
         res.redirect("/protected")
     }
     else{
@@ -70,7 +75,7 @@ Router.get("/dashboard",(req, res) => {
     res.render("dashboard");
 });
 
-Router.get('/protected', isLoggedIn,(req, res)=>
+Router.get('/protected', passport.authenticate('jwt'),isLoggedIn,(req, res)=>
 {
     // Access image option
     // {img: req.session.passport.user.picture}
