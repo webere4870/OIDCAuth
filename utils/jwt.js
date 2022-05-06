@@ -5,7 +5,7 @@ function createJWT(username)
 {
     const payload = {
         sub: username,
-        expiration: Date.now() + parseInt('1000000')
+        expiresIn: Date.now() +  24 * 60 * 60
     }
     let jwt = jsonwebtoken.sign(payload, "secret", {expiresIn: "1d"})
     return jwt
@@ -23,6 +23,7 @@ async function verifyUser(passwordAttempt, salt,hash)
         return false;
     }
 }
+
 
 async function createUser(username, password)
 {

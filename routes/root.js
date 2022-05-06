@@ -1,6 +1,6 @@
 const express = require('express')
 const passport = require('passport')
-const isLoggedIn = require('./../utils/authenticate')
+const authenticationArray = require('./../utils/authenticate')
 const Router = express.Router()
 const Users = require('mongoose').model("JWTUsers")
 const {verifyUser, createJWT, createUser} = require('./../utils/jwt')
@@ -75,7 +75,7 @@ Router.get("/dashboard",(req, res) => {
     res.render("dashboard");
 });
 
-Router.get('/protected', passport.authenticate('jwt'),isLoggedIn,(req, res)=>
+Router.get('/protected', authenticationArray,(req, res)=>
 {
     // Access image option
     // {img: req.session.passport.user.picture}
@@ -86,6 +86,7 @@ Router.get("/logout", (req, res) => {
     req.logout();
     req.session.destroy()
     req.session = null
+    res.clearCookie("secureCookie")
     res.redirect("/");
 });
 
