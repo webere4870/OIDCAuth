@@ -6,13 +6,16 @@ require('dotenv').config({path: __dirname + '/.env'})
 const cookieParser = require('cookie-parser')
 const passport = require('passport')
 const MongoStore = require('connect-mongo')
+
 require('./utils/google')
 require('./utils/facebook')
-require('./utils/passportJWT')
+require('./utils/github')
 require('./utils/database')
 
 
+app.use(express.static(__dirname + "/static"))
 app.use(express.urlencoded({extended: false}))
+app.use(express.json())
 app.use(cookieParser())
 
 
@@ -33,7 +36,6 @@ app.use(passport.session())
 
 
 
-app.use(express.static(__dirname + "/static"))
 app.set('view engine', 'ejs')
 app.use(expressLayouts)
 app.use('/', require('./routes/root'))

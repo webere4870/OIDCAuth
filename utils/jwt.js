@@ -1,13 +1,24 @@
 const bcrypt = require('bcrypt')
 const jsonwebtoken = require('jsonwebtoken')
 
-function createJWT(username)
+function createJWT(username, jwtType)
 {
+    let expire = 0;
+    if(jwtType=="refresh")
+    {
+        expire = 60 * 60 * 24
+    }
+    else
+    {
+        expire = 60 * 60
+    }
+
     const payload = {
         sub: username,
-        expiresIn: Date.now() +  24 * 60 * 60
+        expiresIn: Date.now() +  expire
     }
-    let jwt = jsonwebtoken.sign(payload, "secret", {expiresIn: "1d"})
+    let jwt = jsonwebtoken.sign(payload, "secret", 
+    {expiresIn: jwtType == "refresh" ? "1d": "180s"})
     return jwt
 }
 

@@ -21,6 +21,13 @@ Router.get( '/google/callback',
   })
 );
 
+Router.get('/auth/github', passport.authenticate('github',{ scope: [ 'user:email' ] }))
+
+Router.get('/auth/github/callback',passport.authenticate('github', { failureRedirect: '/auth/error' }),
+function(req, res) {
+  res.redirect('/');
+});
+
 Router.get('/facebook/callback', passport.authenticate('facebook',
 {
     successRedirect:"/protected",
@@ -41,7 +48,8 @@ Router.post('/register', async (req, res)=>
     let {username, password} = req.body;
     let user = await createUser(username, password)
     Users.create(user)
-    let jwt = createJWT(username)
+    let jwt = createJWT(username, "jwt")
+    let refreshJWT = createJWT(username, "refresh")
     res.cookie("secureCookie", JSON.stringify(jwt), {
         httpOnly: true,
         expires: dayjs().add(30, "days").toDate(),
@@ -59,23 +67,23 @@ Router.post('/login', async (req, res)=>
     if(isValid == true)
     {
         let jwt = createJWT(username)
+        let refreshJWT = createJWT(username, "refresh")
         res.cookie("secureCookie", JSON.stringify(jwt), {
             httpOnly: true,
             expires: dayjs().add(30, "days").toDate(),
-          });
+        });
         res.redirect("/protected")
     }
     else{
         res.redirect("/")
     }
-    
 })
   
 Router.get("/dashboard",(req, res) => {
     res.render("dashboard");
 });
 
-Router.get('/protected', authenticationArray,(req, res)=>
+Router.get('/protected', authenticationArray, (req, res)=>
 {
     // Access image option
     // {img: req.session.passport.user.picture}

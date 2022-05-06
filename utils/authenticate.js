@@ -3,10 +3,13 @@ const {createJWT} = require('./../utils/jwt')
 const dayjs = require('dayjs')
 function isLoggedIn(req, res, next)
 {
+    console.log("here")
     if(req.jwt)
     {
+        console.log(req.headers)
         res.clearCookie("secureCookie")
-        let jwt = createJWT(req.jwt.sub)
+        let jwt = createJWT(req.jwt.sub, "jwt")
+        let refresh = createJWT(req.jwt.sub, "refresh")
         res.cookie("secureCookie", JSON.stringify(jwt), {
             httpOnly: true,
             expires: dayjs().add(30, "days").toDate(),
@@ -15,6 +18,7 @@ function isLoggedIn(req, res, next)
     }
     else
     {
+        console.log(req.user)
         req.user ? next() : res.render('index')
     }
     
@@ -46,6 +50,7 @@ function verifyJWT(req, res, next)
     {
         res.render('index')
     }
+    next()
 }
 
 let authenticationArray = [verifyJWT, isLoggedIn]
